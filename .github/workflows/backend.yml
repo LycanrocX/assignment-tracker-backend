@@ -1,0 +1,34 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/app
+
+            # Pull latest code
+            git pull origin main
+
+            # Activate virtual environment
+            source venv/bin/activate
+
+            # Install/update dependencies
+            pip install -r requirements.txt
+
+            # Restart Flask app using gunicorn
+            pkill gunicorn || true
+            sleep 1
+            nohup gunicorn --bind 0.0.0.0:5000 app:app --daemon --log-file ~/app/gunicorn.log
