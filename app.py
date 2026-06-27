@@ -7,7 +7,11 @@ import boto3
 from botocore.exceptions import ClientError
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "http://assignment-tracker-frontend-1.s3-website-us-east-1.amazonaws.com",
+    "http://localhost",
+    "http://127.0.0.1"
+])
 
 # DynamoDB setup — uses IAM Role attached to EC2 (no hardcoded keys)
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
